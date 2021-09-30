@@ -1,0 +1,7 @@
+work/
+results/
+testdata/
+logs/
+*.pyc
+.vscode
+.nextflow*
