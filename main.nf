@@ -57,24 +57,48 @@ process SUMMARIZE_TO_GENE {
         path 'summarized-experiment.rds'
     
     """
-        summarize_to_gene.R 
+        summarize_to_gene.R ${sample_sheet}
+    """
+}
+
+process DIFFERENTIAL_EXPRESSION {
+
+    publishDir "${params.resultsDir}/analysis/", mode: 'copy', overwrite: true
+
+    input: 
+        path sefile
+        tuple val(ccase), val(control)
+
+    output:
+        path "dexp-${ccase}-${ccontrol}.csv"
+    
+    """
+        differential_expression.R ${sefile} dexp-${ccase}-${ccontrol}.csv --control ${ccontrol} --case ${ccase}
     """
 }
 
 workflow {
+
+    // channel.from(params.differential_expression.contrasts).map{ x,y -> tuple(x,y) }.view { x,y -> "$x vs $y"}
+    
     // transcriptome indexing
     tx = file(params.transcriptome)
     SALMON_INDEX(tx)
     
     // mRna quantification
     sample_sheet_file = file(params.sampleSheet)
-    samples_ch = Channel.from(sample_sheet_file)
+    samples_ch = channel.from(sample_sheet_file)
                     .splitCsv(header: true)
                     .map{ record -> tuple(record.sample, file(record.read1), file(record.read2)) }
 
-    SALMON_QUANT(SALMON_INDEX.out, samples)
+    SALMON_QUANT(SALMON_INDEX.out, samples_ch)
 
     // gene level quantification
     SUMMARIZE_TO_GENE(sample_sheet_file, SALMON_QUANT.out.collect())
+
+    // deseq qc
+    contrasts = channel.from(params.differential_expression.contrasts).map{ x,y -> tuple(x,y) }
+    
+
 }
 

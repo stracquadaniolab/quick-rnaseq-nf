@@ -27,7 +27,7 @@ suppressMessages(library(DESeq2))
 sample_sheet <- read_csv(arguments$samplesheet)
 
 # prepare metadata for tximeta and deseq2
-design <- tibble(names=sample_sheet$sample, files=paste(arguments$resultsdir,sample_sheet$sample, "_quant/quant.sf", sep=''), condition = sample_sheet$condition)
+design <- tibble(names=sample_sheet$sample, files=file.path(arguments$inputdir,paste(sample_sheet$sample, "_quant", sep=''), "quant.sf"), condition = sample_sheet$condition)
 
 # quantify and annotate transcripts
 se <- tximeta(design)
