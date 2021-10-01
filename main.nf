@@ -24,7 +24,7 @@ process SALMON_QUANT {
 
     label "process_high"
 
-    publishDir "${params.resultsDir}/salmon/", pattern: "${sample}_quant", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/salmon/", pattern: "${sample}_quant", mode: 'copy', overwrite: true
 
     input: 
         path transcriptome_index
@@ -47,7 +47,9 @@ process SALMON_QUANT {
 
 process SUMMARIZE_TO_GENE {
 
-    publishDir "${params.resultsDir}/deseq/", mode: 'copy', overwrite: true
+    label 'process_high'
+
+    publishDir "${params.resultsdir}/quant/", mode: 'copy', overwrite: true
 
     input: 
         path sample_sheet
@@ -61,19 +63,66 @@ process SUMMARIZE_TO_GENE {
     """
 }
 
-process DIFFERENTIAL_EXPRESSION {
+process QC_PCA {
 
-    publishDir "${params.resultsDir}/analysis/", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
 
     input: 
         path sefile
-        tuple val(ccase), val(control)
 
     output:
-        path "dexp-${ccase}-${ccontrol}.csv"
+        path "pcaplot.pdf"
+    
+    """
+        qc_pca.R ${sefile} pcaplot.pdf
+    """
+}
+
+process QC_MAPLOT {
+
+    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+
+    input: 
+        path sefile
+        tuple val(ccase), val(ccontrol)
+
+    output:
+        path "maplot-${ccase}-${ccontrol}.pdf"
+    
+    """
+        qc_maplot.R ${sefile} maplot-${ccase}-${ccontrol}.pdf --control ${ccontrol} --case ${ccase}
+    """
+}
+
+
+process DIFFERENTIAL_EXPRESSION {
+
+    publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
+
+    input: 
+        path sefile
+        tuple val(ccase), val(ccontrol)
+
+    output:
+        tuple path("dexp-${ccase}-${ccontrol}.csv"), val(ccase), val(ccontrol)
     
     """
         differential_expression.R ${sefile} dexp-${ccase}-${ccontrol}.csv --control ${ccontrol} --case ${ccase}
+    """
+}
+
+process GO_ANALYSIS {
+
+    publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
+
+    input: 
+        tuple path(results), val(ccase), val(ccontrol)
+
+    output:
+        path "go-${ccase}-${ccontrol}.csv"
+    
+    """
+        qrna_go.R ${results} go-${ccase}-${ccontrol}.csv
     """
 }
 
@@ -81,24 +130,32 @@ workflow {
 
     // channel.from(params.differential_expression.contrasts).map{ x,y -> tuple(x,y) }.view { x,y -> "$x vs $y"}
     
-    // transcriptome indexing
-    tx = file(params.transcriptome)
-    SALMON_INDEX(tx)
+    // decoy-aware transcriptome indexing
+    tx_ref_file = file(params.transcriptome.reference)
+    // tx_decoy_file = file(params.transcriptome.decoys)
+    SALMON_INDEX(tx_ref_file)
     
-    // mRna quantification
-    sample_sheet_file = file(params.sampleSheet)
-    samples_ch = channel.from(sample_sheet_file)
+    // mRNA quantification
+    samplesheet_file = file(params.experiment.samplesheet)
+    print(samplesheet_file)
+    samples_ch = channel.from(samplesheet_file)
                     .splitCsv(header: true)
                     .map{ record -> tuple(record.sample, file(record.read1), file(record.read2)) }
 
     SALMON_QUANT(SALMON_INDEX.out, samples_ch)
 
     // gene level quantification
-    SUMMARIZE_TO_GENE(sample_sheet_file, SALMON_QUANT.out.collect())
+    SUMMARIZE_TO_GENE(samplesheet_file, SALMON_QUANT.out.collect())
 
     // deseq qc
-    contrasts = channel.from(params.differential_expression.contrasts).map{ x,y -> tuple(x,y) }
-    
+    contrasts_ch = channel.from(params.experiment.contrasts).map{ x,y -> tuple(x,y) }
+    QC_PCA(SUMMARIZE_TO_GENE.out)
+    QC_MAPLOT(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
+    // differential expression
+    DIFFERENTIAL_EXPRESSION(SUMMARIZE_TO_GENE.out, contrasts_ch)
+
+    // gene ontology analysis
+    GO_ANALYSIS(DIFFERENTIAL_EXPRESSION.out)
 }
 
