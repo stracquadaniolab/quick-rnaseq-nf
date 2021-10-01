@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-'qc_maplot.R
+'quick-rnaseq-ma.R
 
 Usage:
-  qc_maplot.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>]
+  quick-rnaseq-ma.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>]
 
 Options:
   --control=<contrast_control>                Condition to use as control [default: control].
@@ -14,7 +14,7 @@ Options:
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'quant_qc.R')
+arguments <- docopt(doc, version = 'quick-rnaseq-ma.R')
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

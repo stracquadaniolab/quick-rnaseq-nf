@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-'summarize_to_gene.R
+'quick-rnaseq-summarize-to-gene.R
 
 Usage:
-  summarize_to_gene.R <samplesheet> [--inputdir=<inputdir>] [--output=<outfile>] [--counts-from-abundance=<counts_model>]
+  quick-rnaseq-summarize-to-gene.R <samplesheet> [--inputdir=<inputdir>] [--output=<outfile>] [--counts-from-abundance=<counts_model>] [--db-organism=<db_org>]
 
 Options:
   -i --inputdir=<inputdir>                    Directory containing salmon results [default: .].
@@ -17,7 +17,7 @@ Options:
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'summarize_to_gene.R')
+arguments <- docopt(doc, version = 'quick-rnaseq-summarize-to-gene.R')
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

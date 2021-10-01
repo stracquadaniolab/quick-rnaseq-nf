@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-'differential_expression.R
+'quick-rnaseq-dge.R
 
 Usage:
-  differential_expression.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>]
+  quick-rnaseq-dge.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>]
 
 Options:
   --control=<contrast_control>                Condition to use as control [default: control].
@@ -14,7 +14,7 @@ Options:
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'quant_qc.R')
+arguments <- docopt(doc, version = 'quick-rnaseq-dge.R')
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-'qc_pca.R
+'quick-rnaseq-pca.R
 
 Usage:
-  qc_pca.R <inputfile> <outputfile>
+  quick-rnaseq-pca.R <inputfile> <outputfile>
 
 Options:
   -h --help                                   Show this screen.
@@ -12,7 +12,7 @@ Options:
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'quant_qc.R')
+arguments <- docopt(doc, version = 'quick-rnaseq-pca.R')
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

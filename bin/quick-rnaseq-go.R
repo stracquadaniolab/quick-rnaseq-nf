@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
-'qrna_go.R
+'quick-rnaseq-go.R
 
 Usage:
-  qc_maplot.R <inputfile> <outputfile> [--fwer=<alpha>]
+  quick-rnaseq-go.R <inputfile> <outputfile> [--fwer=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>]
 
 Options:
   -f --fwer=<alpha>           Family-wise error rate to filter differentially
@@ -16,7 +16,7 @@ Options:
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'quant_qc.R')
+arguments <- docopt(doc, version = 'quick-rnaseq-go.R')
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

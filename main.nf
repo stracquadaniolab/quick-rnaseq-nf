@@ -4,14 +4,23 @@ nextflow.enable.dsl=2
 process SALMON_INDEX {
     input: 
         path transcriptome
+        path decoys
 
     output: 
         path 'transcriptome_index'
 
     """ 
+        # build decoys id list
+        grep '^>' <(gunzip -c ${decoys}) | cut -d " " -f 1 > decoys.txt
+        sed -i.bak -e 's/>//g' decoys.txt
+
+        # build gentrome
+        cat ${transcriptome} ${decoys} > gentrome.fa.gz
+
         salmon index \\
             -p ${task.cpus} \\
-            -t ${transcriptome} \\
+            -t gentrome.fa.gz \\
+            -d decoys.txt \\
             -i transcriptome_index \\
             ${params.salmon.index.args} 
     """
@@ -35,13 +44,13 @@ process SALMON_QUANT {
 
     """
         salmon quant \\
-            -p ${task.cpus} \\
-            -l A \\
-            -i transcriptome_index \\
-            -1 ${read1} \\
-            -2 ${read2} \\
-            -o ${sample}_quant \\
-            --validateMappings
+        -p ${task.cpus} \\
+        -l ${params.salmon.quant.libtype} \\
+        -i ${transcriptome_index} \\
+        -1 ${read1} \\
+        -2 ${read2} \\
+        -o ${sample}_quant \\
+        ${params.salmon.quant.args}
     """
 }
 
@@ -49,7 +58,7 @@ process SUMMARIZE_TO_GENE {
 
     label 'process_high'
 
-    publishDir "${params.resultsdir}/quant/", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/dataset/", mode: 'copy', overwrite: true
 
     input: 
         path sample_sheet
@@ -59,7 +68,10 @@ process SUMMARIZE_TO_GENE {
         path 'summarized-experiment.rds'
     
     """
-        summarize_to_gene.R ${sample_sheet}
+        quick-rnaseq-summarize-to-gene.R \\
+            ${sample_sheet} \\
+            -c ${params.summarize_to_gene.counts_from_abundance} \\
+            -d ${params.summarize_to_gene.organism_db}
     """
 }
 
@@ -74,7 +86,7 @@ process QC_PCA {
         path "pcaplot.pdf"
     
     """
-        qc_pca.R ${sefile} pcaplot.pdf
+        quick-rnaseq-pca.R ${sefile} pcaplot.pdf
     """
 }
 
@@ -84,60 +96,68 @@ process QC_MAPLOT {
 
     input: 
         path sefile
-        tuple val(ccase), val(ccontrol)
+        tuple val(contrast1), val(contrast2)
 
     output:
-        path "maplot-${ccase}-${ccontrol}.pdf"
+        path "maplot-${contrast1}-${contrast2}.pdf"
     
     """
-        qc_maplot.R ${sefile} maplot-${ccase}-${ccontrol}.pdf --control ${ccontrol} --case ${ccase}
+        quick-rnaseq-ma.R ${sefile} \\
+            maplot-${contrast1}-${contrast2}.pdf \\
+            --case ${contrast1} \\
+            --control ${contrast2} 
     """
 }
 
 
-process DIFFERENTIAL_EXPRESSION {
+process ANALYSIS_DGE {
 
     publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
 
     input: 
         path sefile
-        tuple val(ccase), val(ccontrol)
+        tuple val(contrast1), val(contrast2)
 
     output:
-        tuple path("dexp-${ccase}-${ccontrol}.csv"), val(ccase), val(ccontrol)
+        tuple path("dexp-${contrast1}-${contrast2}.csv"), val(contrast1), val(contrast2)
     
     """
-        differential_expression.R ${sefile} dexp-${ccase}-${ccontrol}.csv --control ${ccontrol} --case ${ccase}
+        quick-rnaseq-dge.R \\
+            ${sefile} \\
+            dexp-${contrast1}-${contrast2}.csv \\
+            --case ${contrast1} \\
+            --control ${contrast2}             
     """
 }
 
-process GO_ANALYSIS {
+process ANALYSIS_GO {
 
     publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
 
     input: 
-        tuple path(results), val(ccase), val(ccontrol)
+        tuple path(results), val(contrast1), val(contrast2)
 
     output:
-        path "go-${ccase}-${ccontrol}.csv"
+        path "go-${contrast1}-${contrast2}.csv"
     
     """
-        qrna_go.R ${results} go-${ccase}-${ccontrol}.csv
+        quick-rnaseq-go.R \\
+            ${results} \\ 
+            go-${contrast1}-${contrast2}.csv \\
+            -d ${params.gene_ontology.organism_db} \\
+            -g ${params.gene_ontology.gene_id} \\ 
     """
 }
 
-workflow {
-
-    // channel.from(params.differential_expression.contrasts).map{ x,y -> tuple(x,y) }.view { x,y -> "$x vs $y"}
+workflow QUICK_RNASEQ{
     
     // decoy-aware transcriptome indexing
     tx_ref_file = file(params.transcriptome.reference)
-    // tx_decoy_file = file(params.transcriptome.decoys)
-    SALMON_INDEX(tx_ref_file)
+    tx_decoy_file = file(params.transcriptome.decoys)
+    SALMON_INDEX(tx_ref_file, tx_decoy_file)
     
     // mRNA quantification
     samplesheet_file = file(params.experiment.samplesheet)
-    print(samplesheet_file)
     samples_ch = channel.from(samplesheet_file)
                     .splitCsv(header: true)
                     .map{ record -> tuple(record.sample, file(record.read1), file(record.read2)) }
@@ -153,9 +173,13 @@ workflow {
     QC_MAPLOT(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
     // differential expression
-    DIFFERENTIAL_EXPRESSION(SUMMARIZE_TO_GENE.out, contrasts_ch)
+    ANALYSIS_DGE(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
     // gene ontology analysis
-    GO_ANALYSIS(DIFFERENTIAL_EXPRESSION.out)
+    ANALYSIS_GO(ANALYSIS_DGE.out)
+}
+
+workflow {
+    QUICK_RNASEQ()
 }
 
