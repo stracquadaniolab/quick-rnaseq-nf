@@ -1,6 +1,32 @@
 // enabling nextflow DSL v2
 nextflow.enable.dsl=2
 
+process TRIM_READS {
+
+    tag "${sample}"
+
+    publishDir "${params.resultsdir}/qc/", pattern: "*.json", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/", pattern: "*.html", mode: 'copy', overwrite: true
+
+    input:
+        tuple val(sample), path(read1), path(read2)
+    output:
+        tuple val(sample), path("${read1.simpleName}.trimmed.fastq.gz"), path("${read2.simpleName}.trimmed.fastq.gz"), emit: fastq
+        tuple val(sample), path("${sample}.reads.json"), path("${sample}.reads.html"), emit: qc
+    
+    """
+        fastp -w ${task.cpus} \\
+            ${params.fastp.args}  \\
+            --in1 ${read1} \\
+            --in2 ${read2} \\
+            --out1 ${read1.simpleName}.trimmed.fastq.gz \\
+            --out2 ${read2.simpleName}.trimmed.fastq.gz \\
+            --json ${sample}.reads.json \\
+            --html ${sample}.reads.html
+    """
+
+}
+
 process SALMON_INDEX {
     input: 
         path transcriptome
@@ -31,9 +57,7 @@ process SALMON_QUANT {
 
     tag "${sample}"
 
-    label "process_high"
-
-    publishDir "${params.resultsdir}/salmon/", pattern: "${sample}_quant", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/quantification/", pattern: "${sample}_quant", mode: 'copy', overwrite: true
 
     input: 
         path transcriptome_index
@@ -55,8 +79,6 @@ process SALMON_QUANT {
 }
 
 process SUMMARIZE_TO_GENE {
-
-    label 'process_high'
 
     publishDir "${params.resultsdir}/dataset/", mode: 'copy', overwrite: true
 
@@ -92,6 +114,8 @@ process QC_PCA {
 
 process QC_MAPLOT {
 
+    tag "${contrast1}-vs-${contrast2}"
+
     publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
 
     input: 
@@ -111,6 +135,8 @@ process QC_MAPLOT {
 
 
 process ANALYSIS_DGE {
+    
+    tag "${contrast1}-vs-${contrast2}"
 
     publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
 
@@ -131,6 +157,8 @@ process ANALYSIS_DGE {
 }
 
 process ANALYSIS_GO {
+
+    tag "${contrast1}-vs-${contrast2}"
 
     publishDir "${params.resultsdir}/analysis/", mode: 'copy', overwrite: true
 
@@ -162,7 +190,8 @@ workflow QUICK_RNASEQ{
                     .splitCsv(header: true)
                     .map{ record -> tuple(record.sample, file(record.read1), file(record.read2)) }
 
-    SALMON_QUANT(SALMON_INDEX.out, samples_ch)
+    TRIM_READS(samples_ch)
+    SALMON_QUANT(SALMON_INDEX.out, TRIM_READS.out.fastq)
 
     // gene level quantification
     SUMMARIZE_TO_GENE(samplesheet_file, SALMON_QUANT.out.collect())
