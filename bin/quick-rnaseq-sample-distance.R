@@ -18,6 +18,8 @@ arguments <- docopt(doc, version = 'quick-rnaseq-sample-distance.R')
 # loading data processing libraries
 suppressMessages(library(tidyverse))
 suppressMessages(library(DESeq2))
+suppressMessages(library(pheatmap))
+
 
 # reading deseq object
 dse <- readRDS(arguments$inputfile)
@@ -31,13 +33,17 @@ if (arguments$transform == "vst"){
 }
 
 # compute the distance matrix
-dist_matrix <- as.matrix(dist(t(assay(dse_t))))
+dist <- dist(t(assay(dse_t)))
 
 # set pdf device with 4:3 ratio
-pdf(arguments$outputfile, width=4, height=3)
+pdf(arguments$outputfile, width=6, height=(3/4)*6)
 
 # plot heatmap
-heatmap(dist_matrix, labCol=FALSE, legend='col')
+dist_color <- colorRampPalette(c('#08519c', '#FFFFFF'))
+pheatmap(as.matrix(dist), 
+  clustering_distance_rows=dist,
+  clustering_distance_cols=dist,
+  col=dist_color(100))
 
 # close device
 dev.off()

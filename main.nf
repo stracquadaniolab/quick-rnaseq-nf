@@ -57,14 +57,14 @@ process SALMON_QUANT {
 
     tag "${sample}"
 
-    publishDir "${params.resultsdir}/quantification/", pattern: "${sample}_quant", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/quantification/", mode: 'copy', overwrite: true
 
     input: 
         path transcriptome_index
         tuple val(sample), path(read1), path(read2)
 
     output:
-        path("${sample}_quant")
+        path("${sample}")
 
     """
         salmon quant \\
@@ -73,7 +73,7 @@ process SALMON_QUANT {
         -i ${transcriptome_index} \\
         -1 ${read1} \\
         -2 ${read2} \\
-        -o ${sample}_quant \\
+        -o ${sample} \\
         ${params.salmon.quant.args}
     """
 }
@@ -213,13 +213,16 @@ workflow QUICK_RNASEQ{
     tx_decoy_file = file(params.transcriptome.decoys)
     SALMON_INDEX(tx_ref_file, tx_decoy_file)
     
-    // mRNA quantification
+    // sample channels
     samplesheet_file = file(params.experiment.samplesheet)
     samples_ch = channel.from(samplesheet_file)
                     .splitCsv(header: true)
                     .map{ record -> tuple(record.sample, file(record.read1), file(record.read2)) }
 
+    // reads trimming
     TRIM_READS(samples_ch)
+
+    // quantification
     SALMON_QUANT(SALMON_INDEX.out, TRIM_READS.out.fastq)
 
     // gene level quantification

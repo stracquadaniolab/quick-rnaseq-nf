@@ -25,9 +25,7 @@ dse <- readRDS(arguments$inputfile)
 
 # performing differential expression analysis
 results <- results(dse, contrast = c("condition", arguments$case, arguments$control), saveCols = c("SYMBOL", "gene_id"))
-results.df <- as_tibble(results)
-results.df <- results.df %>% relocate(SYMBOL) %>% relocate(gene_id)
-results.df <- results.df[order(results.df$pvalue), ]
+results.df <- as_tibble(results) %>% relocate(SYMBOL) %>% relocate(gene_id) %>% arrange(pvalue)
 
 # save results
 write_csv(as_tibble(results.df), file=arguments$outputfile)
