@@ -3,9 +3,10 @@
 'quick-rnaseq-pca.R
 
 Usage:
-  quick-rnaseq-pca.R <inputfile> <outputfile>
+  quick-rnaseq-pca.R <inputfile> <outputfile> [--transform=<tf>]
 
 Options:
+  --transform=<tf>                            Transform function applied to counts [default: rlog]
   -h --help                                   Show this screen.
   --version                                   Show version.
 ' -> doc
@@ -20,9 +21,18 @@ suppressMessages(library(DESeq2))
 
 # reading deseq object
 dse <- readRDS(arguments$inputfile)
+dse_t <- NULL
 
+# pick counts transformation
+if (arguments$transform == "vst"){
+  dse_t = vst(dse)
+}else{
+  dse_t = rlog(dse)
+}
+
+# plotting PCA results
 # code adapted from the deseq2 vignette
-pca <- plotPCA(rlog(dse), intgroup = "condition", returnData = TRUE)
+pca <- plotPCA(dse_t, intgroup = "condition", returnData = TRUE)
 pct_var <- round(100 * attr(pca, "percentVar"))
 plt <- ggplot(pca, aes(PC1, PC2, color=condition)) +
         geom_point(size=3) +

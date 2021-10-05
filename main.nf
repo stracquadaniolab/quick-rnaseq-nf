@@ -5,14 +5,14 @@ process TRIM_READS {
 
     tag "${sample}"
 
-    publishDir "${params.resultsdir}/qc/", pattern: "*.json", mode: 'copy', overwrite: true
-    publishDir "${params.resultsdir}/qc/", pattern: "*.html", mode: 'copy', overwrite: true
+    // publishDir "${params.resultsdir}/qc/", pattern: "*.json", mode: 'copy', overwrite: true
+    // publishDir "${params.resultsdir}/qc/", pattern: "*.html", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample), path(read1), path(read2)
     output:
         tuple val(sample), path("${read1.simpleName}.trimmed.fastq.gz"), path("${read2.simpleName}.trimmed.fastq.gz"), emit: fastq
-        tuple val(sample), path("${sample}.reads.json"), path("${sample}.reads.html"), emit: qc
+        path "${sample}.fastp.json", emit: qc
     
     """
         fastp -w ${task.cpus} \\
@@ -21,8 +21,8 @@ process TRIM_READS {
             --in2 ${read2} \\
             --out1 ${read1.simpleName}.trimmed.fastq.gz \\
             --out2 ${read2.simpleName}.trimmed.fastq.gz \\
-            --json ${sample}.reads.json \\
-            --html ${sample}.reads.html
+            --json ${sample}.fastp.json \\
+            --html ${sample}.fastp.html
     """
 
 }
@@ -108,7 +108,7 @@ process QC_PCA {
         path "pcaplot.pdf"
     
     """
-        quick-rnaseq-pca.R ${sefile} pcaplot.pdf
+        quick-rnaseq-pca.R ${sefile} pcaplot.pdf --transform=${params.qc.pca.transform}
     """
 }
 
@@ -133,6 +133,35 @@ process QC_MAPLOT {
     """
 }
 
+process QC_SAMPLE {
+
+    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+
+    input: 
+        path sefile
+
+    output:
+        path "sample-clustering.pdf"
+    
+    """
+        quick-rnaseq-sample-distance.R ${sefile} sample-clustering.pdf --transform=${params.qc.sample.transform}
+    """
+}
+
+process QC_REPORT {
+    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+
+    input: 
+        path reads_json
+        path salmon_quant
+
+    output:
+        path "multiqc_report.html"
+    
+    """
+        multiqc .
+    """
+}
 
 process ANALYSIS_DGE {
     
@@ -199,13 +228,15 @@ workflow QUICK_RNASEQ{
     // deseq qc
     contrasts_ch = channel.from(params.experiment.contrasts).map{ x,y -> tuple(x,y) }
     QC_PCA(SUMMARIZE_TO_GENE.out)
+    QC_SAMPLE(SUMMARIZE_TO_GENE.out)
     QC_MAPLOT(SUMMARIZE_TO_GENE.out, contrasts_ch)
+    QC_REPORT(TRIM_READS.out.qc.collect(), SALMON_QUANT.out.collect())
 
     // differential expression
     ANALYSIS_DGE(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
     // gene ontology analysis
-    ANALYSIS_GO(ANALYSIS_DGE.out)
+    // ANALYSIS_GO(ANALYSIS_DGE.out)
 }
 
 workflow {
