@@ -129,7 +129,8 @@ process QC_MAPLOT {
         quick-rnaseq-ma.R ${sefile} \\
             maplot-${contrast1}-vs-${contrast2}.pdf \\
             --case ${contrast1} \\
-            --control ${contrast2} 
+            --control ${contrast2} \\
+            -l ${params.qc.ma.lfc_threshold}
     """
 }
 
@@ -182,6 +183,7 @@ process ANALYSIS_DGE {
             dge-${contrast1}-vs-${contrast2}.csv \\
             --case ${contrast1} \\
             --control ${contrast2} \\
+            -l ${params.dge.lfc_threshold} \\
             -f ${params.dge.fdr}
     """
 }

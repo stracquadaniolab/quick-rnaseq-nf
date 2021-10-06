@@ -3,12 +3,13 @@
 'quick-rnaseq-dge.R
 
 Usage:
-  quick-rnaseq-dge.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>] [--fdr=<alpha>]
+  quick-rnaseq-dge.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>] [--log-foldchange=<lfc>][--fdr=<alpha>]
 
 Options:
   --control=<contrast_control>                Condition to use as control [default: control].
   --case=<contrast_case>                      Condition to use as case [default: case].
-  -f --fdr=<alpha>                               False Discovery Rate threshold for independent filtering [default: 0.01].
+  -l --log-foldchange=<lfc>                   Log2 fold-change threshold [default: 0].
+  -f --fdr=<alpha>                            False Discovery Rate threshold for independent filtering [default: 0.01].
   -h --help                                   Show this screen.
   --version                                   Show version.
 ' -> doc
@@ -25,7 +26,13 @@ suppressMessages(library(DESeq2))
 dse <- readRDS(arguments$inputfile)
 
 # performing differential expression analysis
-results <- results(dse, contrast = c("condition", arguments$case, arguments$control), saveCols = c("SYMBOL", "gene_id"), independentFiltering = TRUE, alpha = as.numeric(arguments$fdr))
+results <- results(dse, 
+                  contrast = c("condition", arguments$case, arguments$control),
+                  saveCols = c("SYMBOL", "gene_id"), 
+                  independentFiltering = TRUE, 
+                  alpha = as.numeric(arguments$fdr),  
+                  lfcThreshold = as.numeric(arguments$log_foldchange))
+
 results.df <- as_tibble(results) %>% relocate(SYMBOL) %>% relocate(gene_id) %>% arrange(pvalue)
 
 # save results

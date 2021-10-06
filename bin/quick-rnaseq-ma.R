@@ -8,6 +8,7 @@ Usage:
 Options:
   --control=<contrast_control>                Condition to use as control [default: control].
   --case=<contrast_case>                      Condition to use as case [default: case].
+  -l --log-foldchange=<lfc>                   Log2 fold-change threshold [default: 0].
   -h --help                                   Show this screen.
   --version                                   Show version.
 ' -> doc
@@ -22,7 +23,8 @@ suppressMessages(library(DESeq2))
 
 # reading deseq object
 dse <- readRDS(arguments$inputfile)
-res <- lfcShrink(dse, contrast = c("condition", arguments$case, arguments$control), type="normal")
+res <- lfcShrink(dse, contrast = c("condition", arguments$case, arguments$control), 
+                type="normal", lfcThreshold = as.numeric(arguments$log_foldchange))
 ma <- plotMA(res, returnData=TRUE)
 
 # drawing a maplot using ggplot2
