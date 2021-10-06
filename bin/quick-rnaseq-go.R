@@ -3,11 +3,11 @@
 'quick-rnaseq-go.R
 
 Usage:
-  quick-rnaseq-go.R <inputfile> <outputfile> [--fwer=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>] [--remove-gencode-version=<gv>]
+  quick-rnaseq-go.R <inputfile> <outputfile> [--fdr=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>] [--remove-gencode-version=<gv>]
 
 Options:
-  -f --fwer=<alpha>                     Family-wise error rate to filter differentially
-                                        expressed genes [default: 0.05].
+  -f --fdr=<alpha>                      False Discovery Rate threshold to filter differentially
+                                        expressed genes [default: 0.01].
   -d --db-organism=<db_org>             Organism database for gene annotation [default: org.Hs.eg.db].
   -g --gene-id=<gene_id>                Gene ID type [default: ensembl].
   --remove-gencode-version=<gv>         Remove Genecode gene version [default: no].
@@ -35,14 +35,14 @@ if (arguments$remove_gencode_version == 'yes'){
 }
 
 # gene list
-gene_list <- res$pvalue
+gene_list <- res$padj
 names(gene_list) <- res$gene_id
 
 # GO data
 go_data <- new("topGOdata",
                 ontology = "BP",
                 allGenes = gene_list,
-                geneSelectionFun = function(.x) {.x <= (as.numeric(arguments$fwer)/length(gene_list))},
+                geneSelectionFun = function(.x) {.x <= as.numeric(arguments$fdr)},
                 annot = annFUN.org, mapping = arguments$db_organism, ID=arguments$gene_id)
 
 # perform classical fisher test

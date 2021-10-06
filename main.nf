@@ -123,11 +123,11 @@ process QC_MAPLOT {
         tuple val(contrast1), val(contrast2)
 
     output:
-        path "maplot-${contrast1}-${contrast2}.pdf"
+        path "maplot-${contrast1}-vs-${contrast2}.pdf"
     
     """
         quick-rnaseq-ma.R ${sefile} \\
-            maplot-${contrast1}-${contrast2}.pdf \\
+            maplot-${contrast1}-vs-${contrast2}.pdf \\
             --case ${contrast1} \\
             --control ${contrast2} 
     """
@@ -174,14 +174,15 @@ process ANALYSIS_DGE {
         tuple val(contrast1), val(contrast2)
 
     output:
-        tuple path("dexp-${contrast1}-${contrast2}.csv"), val(contrast1), val(contrast2)
+        tuple path("dge-${contrast1}-vs-${contrast2}.csv"), val(contrast1), val(contrast2)
     
     """
         quick-rnaseq-dge.R \\
             ${sefile} \\
-            dexp-${contrast1}-${contrast2}.csv \\
+            dge-${contrast1}-vs-${contrast2}.csv \\
             --case ${contrast1} \\
-            --control ${contrast2}             
+            --control ${contrast2} \\
+            -f ${params.dge.fdr}
     """
 }
 
@@ -195,13 +196,14 @@ process ANALYSIS_GO {
         tuple path(results), val(contrast1), val(contrast2)
 
     output:
-        path "go-${contrast1}-${contrast2}.csv"
+        path "go-${contrast1}-vs-${contrast2}.csv"
     
     """
-        quick-rnaseq-go.R ${results}\\
-            go-${contrast1}-${contrast2}.csv\\
-            -d ${params.gene_ontology.organism_db}\\
-            -g ${params.gene_ontology.gene_id}\\
+        quick-rnaseq-go.R ${results} \\
+            go-${contrast1}-vs-${contrast2}.csv \\
+            -d ${params.gene_ontology.organism_db} \\
+            -g ${params.gene_ontology.gene_id} \\
+            -f ${params.gene_ontology.fdr} \\
             --remove-gencode-version=${params.gene_ontology.remove_gencode_version}
     """
 }
