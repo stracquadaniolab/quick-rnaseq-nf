@@ -24,6 +24,6 @@ LABEL org.opencontainers.image.vendor="stracquadaniolab"
 LABEL org.opencontainers.image.authors="Giovanni Stracquadanio"
 LABEL org.opencontainers.image.revision="v0.0.0"
 
-COPY --chown=micromamba:micromamba containers/${CONDA_FILE} .
-RUN micromamba install -y -n base -f ${CONDA_FILE} && \
+COPY --chown=micromamba:micromamba containers/env.base.yml .
+RUN micromamba install -y -n base -f env.base.yml && \
     micromamba clean --all --yes
