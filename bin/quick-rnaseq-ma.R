@@ -3,7 +3,7 @@
 'quick-rnaseq-ma.R
 
 Usage:
-  quick-rnaseq-ma.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>] [--transform=<tf>]
+  quick-rnaseq-ma.R <inputfile> <outputfile> [--control=<contrast_control>] [--case=<contrast_case>] [--transform=<tf>] [--log-foldchange=<lfc>]
 
 Options:
   --control=<contrast_control>                Condition to use as control [default: control].
