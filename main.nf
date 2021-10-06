@@ -239,7 +239,7 @@ workflow QUICK_RNASEQ{
     ANALYSIS_DGE(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
     // gene ontology analysis
-    ANALYSIS_GO(ANALYSIS_DGE.out)
+    // ANALYSIS_GO(ANALYSIS_DGE.out)
 }
 
 workflow {
