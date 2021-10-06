@@ -32,7 +32,7 @@ sample_sheet <- read_csv(arguments$samplesheet)
 design <- tibble(names=sample_sheet$sample, files=file.path(arguments$inputdir,paste(sample_sheet$sample, sep=''), "quant.sf"), condition = factor(sample_sheet$condition))
 
 # quantify and annotate transcripts
-se <- tximeta(design)
+se <- tximeta(design, type="salmon")
 
 # summarize counts to gene level
 gse <- summarizeToGene(se, countsFromAbundance = arguments$counts_from_abundance)
