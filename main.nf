@@ -5,8 +5,8 @@ process TRIM_READS {
 
     tag "${sample}"
 
-    // publishDir "${params.resultsdir}/qc/", pattern: "*.json", mode: 'copy', overwrite: true
-    // publishDir "${params.resultsdir}/qc/", pattern: "*.html", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/reads", pattern: "*.json", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/reads", pattern: "*.html", mode: 'copy', overwrite: true
 
     input:
         tuple val(sample), path(read1), path(read2)
@@ -99,7 +99,7 @@ process SUMMARIZE_TO_GENE {
 
 process QC_PCA {
 
-    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/quantification", mode: 'copy', overwrite: true
 
     input: 
         path sefile
@@ -116,7 +116,7 @@ process QC_MAPLOT {
 
     tag "${contrast1}-vs-${contrast2}"
 
-    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/dge", mode: 'copy', overwrite: true
 
     input: 
         path sefile
@@ -135,7 +135,7 @@ process QC_MAPLOT {
 
 process QC_SAMPLE {
 
-    publishDir "${params.resultsdir}/qc/", mode: 'copy', overwrite: true
+    publishDir "${params.resultsdir}/qc/quantification", mode: 'copy', overwrite: true
 
     input: 
         path sefile
@@ -239,7 +239,7 @@ workflow QUICK_RNASEQ{
     ANALYSIS_DGE(SUMMARIZE_TO_GENE.out, contrasts_ch)
 
     // gene ontology analysis
-    // ANALYSIS_GO(ANALYSIS_DGE.out)
+    ANALYSIS_GO(ANALYSIS_DGE.out)
 }
 
 workflow {

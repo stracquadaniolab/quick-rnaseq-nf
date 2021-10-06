@@ -34,4 +34,6 @@ plt <- ggplot(ma, aes(x=mean, y=lfc, color=isDE)) +
         scale_x_continuous("mean of normalized counts") +  
         scale_colour_manual(values =c('#CCCCCC', '#08519c')) + 
         theme(panel.background = element_rect(fill = "white", colour = "#737373", size=1)) + guides(color = "none")
+
+# saving the plot with 4:3 ratio
 ggsave(arguments$outputfile, plot = plt, width=5, height=5*(3/4))
