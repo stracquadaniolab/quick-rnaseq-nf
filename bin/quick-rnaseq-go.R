@@ -8,9 +8,9 @@ Usage:
 Options:
   -f --fwer=<alpha>                     Family-wise error rate to filter differentially
                                         expressed genes [default: 0.05].
-  -d --db-organism=<db_org>             Organism database for gene annotation [default: org.Hs.eg.db]
-  -g --gene-id=<gene_id>                Gene ID type [default: ensembl]
-  --remove-gencode-version=<gv>         Remove Genecode gene version [default: no]
+  -d --db-organism=<db_org>             Organism database for gene annotation [default: org.Hs.eg.db].
+  -g --gene-id=<gene_id>                Gene ID type [default: ensembl].
+  --remove-gencode-version=<gv>         Remove Genecode gene version [default: no].
   -h --help                             Show this screen.
   --version                             Show version.
 ' -> doc
@@ -18,6 +18,7 @@ Options:
 # parsing command line arguments
 library(docopt)
 arguments <- docopt(doc, version = 'quick-rnaseq-go.R')
+print(arguments)
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))

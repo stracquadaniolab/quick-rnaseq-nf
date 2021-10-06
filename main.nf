@@ -198,11 +198,10 @@ process ANALYSIS_GO {
         path "go-${contrast1}-${contrast2}.csv"
     
     """
-        quick-rnaseq-go.R \\
-            ${results} \\ 
-            go-${contrast1}-${contrast2}.csv \\
-            -d ${params.gene_ontology.organism_db} \\
-            -g ${params.gene_ontology.gene_id} \\ 
+        quick-rnaseq-go.R ${results}\\
+            go-${contrast1}-${contrast2}.csv\\
+            -d ${params.gene_ontology.organism_db}\\
+            -g ${params.gene_ontology.gene_id}\\
             --remove-gencode-version=${params.gene_ontology.remove_gencode_version}
     """
 }
