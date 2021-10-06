@@ -3,14 +3,14 @@
 'quick-rnaseq-go.R
 
 Usage:
-  quick-rnaseq-go.R <inputfile> <outputfile> [--fwer=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>] [--remove-genecode-version=<gv>]
+  quick-rnaseq-go.R <inputfile> <outputfile> [--fwer=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>] [--remove-gencode-version=<gv>]
 
 Options:
   -f --fwer=<alpha>                     Family-wise error rate to filter differentially
                                         expressed genes [default: 0.05].
   -d --db-organism=<db_org>             Organism database for gene annotation [default: org.Hs.eg.db]
   -g --gene-id=<gene_id>                Gene ID type [default: ensembl]
-  --remove-genecode-version=<gv>        Remove Genecode gene version [default: no]
+  --remove-gencode-version=<gv>         Remove Genecode gene version [default: no]
   -h --help                             Show this screen.
   --version                             Show version.
 ' -> doc
@@ -28,7 +28,8 @@ suppressMessages(library(topGO))
 res <- read_csv(arguments$inputfile)
 res <- res[!is.na(res$pvalue),]
 
-if (arguments$remove_genecode_version == 'yes'){
+if (arguments$remove_gencode_version == 'yes'){
+  print("removing gencode version")
   res$gene_id <- str_replace(res$gene_id, "\\.[0-9]*", "")
 }
 

@@ -203,7 +203,7 @@ process ANALYSIS_GO {
             go-${contrast1}-${contrast2}.csv \\
             -d ${params.gene_ontology.organism_db} \\
             -g ${params.gene_ontology.gene_id} \\ 
-            --remove-genecode-version=${params.gene_ontology.remove_gencode_version}
+            --remove-gencode-version=${params.gene_ontology.remove_gencode_version}
     """
 }
 
