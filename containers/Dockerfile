@@ -25,7 +25,7 @@ LABEL org.opencontainers.image.documentation="https://github.com/stracquadaniola
 LABEL org.opencontainers.image.source="https://github.com/stracquadaniolab/quick-rnaseq-nf"
 LABEL org.opencontainers.image.vendor="stracquadaniolab"
 LABEL org.opencontainers.image.authors="Giovanni Stracquadanio"
-LABEL org.opencontainers.image.revision="v0.1.0"
+LABEL org.opencontainers.image.revision="v0.2.0"
 
 COPY --chown=micromamba:micromamba ${CONDA_FILE} /tmp
 RUN micromamba install -y -n base -f /tmp/`basename ${CONDA_FILE}` && \
