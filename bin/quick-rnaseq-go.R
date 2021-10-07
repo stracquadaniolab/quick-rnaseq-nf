@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-'quick-rnaseq-go.R
+"quick-rnaseq-go.R
 
 Usage:
   quick-rnaseq-go.R <inputfile> <outputfile> [--fdr=<alpha>] [--db-organism=<db_org>] [--gene-id=<gene_id>] [--remove-gencode-version=<gv>]
@@ -13,12 +13,11 @@ Options:
   --remove-gencode-version=<gv>         Remove Genecode gene version [default: no].
   -h --help                             Show this screen.
   --version                             Show version.
-' -> doc
+" -> doc
 
 # parsing command line arguments
 library(docopt)
-arguments <- docopt(doc, version = 'quick-rnaseq-go.R')
-print(arguments)
+arguments <- docopt(doc, version = "quick-rnaseq-go.R")
 
 # loading data processing libraries
 suppressMessages(library(tidyverse))
@@ -27,9 +26,9 @@ suppressMessages(library(topGO))
 
 # reading deseq object
 res <- read_csv(arguments$inputfile)
-res <- res[!is.na(res$padj),]
+res <- res[!is.na(res$padj), ]
 
-if (arguments$remove_gencode_version == 'yes'){
+if (arguments$remove_gencode_version == "yes") {
   print("removing gencode version")
   res$gene_id <- str_replace(res$gene_id, "\\.[0-9]*", "")
 }
@@ -40,10 +39,13 @@ names(gene_list) <- res$gene_id
 
 # GO data
 go_data <- new("topGOdata",
-                ontology = "BP",
-                allGenes = gene_list,
-                geneSelectionFun = function(.x) {.x <= as.numeric(arguments$fdr)},
-                annot = annFUN.org, mapping = arguments$db_organism, ID=arguments$gene_id)
+  ontology = "BP",
+  allGenes = gene_list,
+  geneSelectionFun = function(.x) {
+    .x <= as.numeric(arguments$fdr)
+  },
+  annot = annFUN.org, mapping = arguments$db_organism, ID = arguments$gene_id
+)
 
 # perform classical fisher test
 fisher_test <- runTest(go_data, algorithm = "classic", statistic = "fisher")

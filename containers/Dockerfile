@@ -12,8 +12,11 @@ ENTRYPOINT ["tini", "--"]
 CMD ["/bin/bash"]
 
 ## main container
-ARG CONDA_FILE=env.base.yml
 FROM base_container
+
+# custon conda file. Default: env.base.yml
+ARG CONDA_FILE=containers/env.base.yml
+
 # adding opencontainer labels to link registry to github repository
 LABEL org.opencontainers.image.title="quick-rnaseq-nf"
 LABEL org.opencontainers.image.description="A basic and quick workflow for differential expression analysis"
@@ -24,6 +27,6 @@ LABEL org.opencontainers.image.vendor="stracquadaniolab"
 LABEL org.opencontainers.image.authors="Giovanni Stracquadanio"
 LABEL org.opencontainers.image.revision="v0.1.0"
 
-COPY --chown=micromamba:micromamba containers/env.base.yml .
-RUN micromamba install -y -n base -f env.base.yml && \
+COPY --chown=micromamba:micromamba ${CONDA_FILE} /tmp
+RUN micromamba install -y -n base -f /tmp/`basename ${CONDA_FILE}` && \
     micromamba clean --all --yes
