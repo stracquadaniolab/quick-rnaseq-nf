@@ -27,7 +27,7 @@ suppressMessages(library(topGO))
 
 # reading deseq object
 res <- read_csv(arguments$inputfile)
-res <- res[!is.na(res$pvalue),]
+res <- res[!is.na(res$padj),]
 
 if (arguments$remove_gencode_version == 'yes'){
   print("removing gencode version")

@@ -105,10 +105,25 @@ process QC_PCA {
         path sefile
 
     output:
-        path "pcaplot.pdf"
+        path "pca-plot.pdf"
     
     """
-        quick-rnaseq-pca.R ${sefile} pcaplot.pdf --transform=${params.qc.pca.transform}
+        quick-rnaseq-pca.R ${sefile} pca-plot.pdf --transform=${params.qc.pca.transform}
+    """
+}
+
+process QC_COOK {
+
+    publishDir "${params.resultsdir}/qc/dge", mode: 'copy', overwrite: true
+
+    input: 
+        path sefile
+
+    output:
+        path "cook-plot.pdf"
+    
+    """
+        quick-rnaseq-cook.R ${sefile} cook-plot.pdf
     """
 }
 
@@ -237,6 +252,7 @@ workflow QUICK_RNASEQ{
     QC_PCA(SUMMARIZE_TO_GENE.out)
     QC_SAMPLE(SUMMARIZE_TO_GENE.out)
     QC_MAPLOT(SUMMARIZE_TO_GENE.out, contrasts_ch)
+    QC_COOK(SUMMARIZE_TO_GENE.out)
     QC_REPORT(TRIM_READS.out.qc.collect(), SALMON_QUANT.out.collect())
 
     // differential expression
