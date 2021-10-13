@@ -28,7 +28,7 @@ dse <- readRDS(arguments$inputfile)
 # performing differential expression analysis
 results <- results(dse,
   contrast = c("condition", arguments$case, arguments$control),
-  saveCols = c("SYMBOL", "gene_id"),
+  saveCols = c("SYMBOL", "gene_id", "ENTREZID"),
   independentFiltering = TRUE,
   alpha = as.numeric(arguments$fdr),
   lfcThreshold = as.numeric(arguments$log_foldchange)
@@ -36,6 +36,7 @@ results <- results(dse,
 
 results_df <- as_tibble(results) %>%
   relocate(SYMBOL) %>%
+  relocate(ENTREZID) %>%
   relocate(gene_id) %>%
   arrange(pvalue)
 

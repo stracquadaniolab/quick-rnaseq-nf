@@ -43,6 +43,7 @@ gse <- summarizeToGene(se, countsFromAbundance = arguments$counts_from_abundance
 
 # adding gene symbols
 gse <- addIds(gse, "SYMBOL", gene = TRUE)
+gse <- addIds(gse, "ENTREZID", gene = TRUE)
 
 # build deseq dataset
 dds <- DESeqDataSet(gse, ~condition)
