@@ -1,6 +1,7 @@
 # quick-rnaseq-nf
 
 ![](https://github.com/stracquadaniolab/quick-rnaseq-nf/workflows/build/badge.svg)
+![](https://img.shields.io/github/v/tag/stracquadaniolab/quick-rnaseq-nf)
 
 A basic and quick workflow for differential expression analysis. 
 
