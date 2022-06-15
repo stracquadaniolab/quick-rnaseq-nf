@@ -4,13 +4,9 @@
 
 A basic and quick workflow for differential expression analysis. 
 
-`quick-rnaseq` consists of the following steps: 
-1. Reads trimming using `fastp`.
-2. Transcript-level quantification using `Salmon`.
-3. Gene-level quantification using `tximeta`.
-4. Differential expression analysis using `DESeq2`.
-5. Gene Ontology (GO) analysis using `TopGO`.
-6. Quality Control using PCA, MA and heatmap plots.
+##  Overview
+
+[![](https://mermaid.ink/img/pako:eNp9ks1OwzAQhF9l5TM90GORkNqkf0JQIL0lPaziTWsR28HeiBbSd8dtXAlQhQ-W9c14vBr5S5RWkhiJqrYf5Q4dwzq9KwyENc7XTmlNEl4Jpd_0dBIoGl861bDVBMpI2kctyV-fxvDeomFVqRJZWROlNM9ardGpz5C3JUNQ2tbwJXWap6qqyFG4iTXQvnHkfbgOaLA-eHUxzvKXBB7H0NSWI5qfULJaPYBUntGU9FNdnNQFIWtsIlrm89MAK8O2ttvD3yf6PbvNn1E5kgMyEty5gcHgHroKPTcdjCHWlA1_N7KBs81jrcP453o6mMRKf2nnojpIYtDkPzHpRd4rTYxdGlvtaTrN6H3YwewanV-Di1h7D9e2ma-65dXMqbgRmpxGJcM3-Tp5CsE70lSIUThKdG-FKMwx-NpGItNUKrZOjCqsPd0IbNlmB1OKEbuWLqZU4dahjq7jN65wzq0)](https://mermaid.live/edit#pako:eNp9ks1OwzAQhF9l5TM90GORkNqkf0JQIL0lPaziTWsR28HeiBbSd8dtXAlQhQ-W9c14vBr5S5RWkhiJqrYf5Q4dwzq9KwyENc7XTmlNEl4Jpd_0dBIoGl861bDVBMpI2kctyV-fxvDeomFVqRJZWROlNM9ardGpz5C3JUNQ2tbwJXWap6qqyFG4iTXQvnHkfbgOaLA-eHUxzvKXBB7H0NSWI5qfULJaPYBUntGU9FNdnNQFIWtsIlrm89MAK8O2ttvD3yf6PbvNn1E5kgMyEty5gcHgHroKPTcdjCHWlA1_N7KBs81jrcP453o6mMRKf2nnojpIYtDkPzHpRd4rTYxdGlvtaTrN6H3YwewanV-Di1h7D9e2ma-65dXMqbgRmpxGJcM3-Tp5CsE70lSIUThKdG-FKMwx-NpGItNUKrZOjCqsPd0IbNlmB1OKEbuWLqZU4dahjq7jN65wzq0)
 
 ## Configuration
 
