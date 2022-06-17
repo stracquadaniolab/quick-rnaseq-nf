@@ -2,6 +2,8 @@
 
 ![](https://github.com/stracquadaniolab/quick-rnaseq-nf/workflows/build/badge.svg)
 ![](https://img.shields.io/github/v/tag/stracquadaniolab/quick-rnaseq-nf)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6656442.svg)](https://doi.org/10.5281/zenodo.6656442)
+
 
 A basic and quick workflow for differential expression analysis. 
 
